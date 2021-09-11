@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./lunbo.css">
+    <link rel="stylesheet" href="./reset.css">
+    <link rel="stylesheet" href="./fontaqesome_css/all.min.css">
+</head>
+
+<style>
+
+</style>
+<body>
+
+<!-- 轮播图 -->
+<div class='slider'>
+    <ul>
+        <li class='slider_item--selected'>
+            <img src="./src/pic1.png" alt="">
+        </li>
+        <li class='slider_item'>
+            <img src="./src/pic2.png" alt="">
+        </li>
+        <li class='slider_item'>
+            <img src="./src/pic3.png" alt="">
+        </li>
+        <li class='slider_item'>
+            <img src="./src/pic4.png" alt="">
+        </li>
+    </ul>
+
+    <!-- 两个a控制上一张和下一张 -->
+    <a href="#" class="slider_next">
+        <i class='fas fa-angle-right'></i>
+    </a>
+    <a href="#" class="slider_previous">
+        <i class='fas fa-angle-left'></i>
+    </a>
+
+    <!-- 四个span表示底部的四个小圆点 -->
+    <div class="slider_control">
+        <span class="slider_control-buttons--selected"></span>
+        <span class="slider_control-buttons"></span>
+        <span class="slider_control-buttons"></span>
+        <span class="slider_control-buttons"></span>
+    </div>
+</div>
+</body>
+
+<script>
+    class Slider{
+        constructor(container,cycle=3000) {
+            this.cycle=cycle;
+            this.container=container;
+            this.items=Array.from(container.querySelectorAll('.slider_item,.slider_item--selected'));
+            const controller=this.container.querySelector('.slider_control');
+            const buttons=Array.from(this.container.querySelectorAll('.slider_control-buttons,.slider_control-buttons--selected'));
+
+           controller.addEventListener('mouseover',(event)=>{
+               const idx=buttons.indexOf(event.target);
+               if(idx!=-1) {
+                   this.sliderto(idx);
+                   this.stop();
+               }
+           })
+            controller.addEventListener('mouseout',()=>{
+                this.start(); //重新开启自动播放
+            })
+
+            this.container.addEventListener('slide',(event)=>{
+                const idx=event.detail.index;
+                const currentitem=controller.querySelector('.slider_control-buttons--selected');
+                currentitem.className='slider_control-buttons'
+                buttons[idx].className='slider_control-buttons--selected'
+            })
+            this.previous=document.getElementsByClassName('slider_previous')[0];
+            this.previous.onclick=(event)=>{
+                this.stop()
+                this.slidePrevious()
+                this.start()
+                event.preventDefault();
+            }
+            this.next=document.getElementsByClassName('slider_next')[0];
+            this.next.onclick=(event)=>{
+                this.stop()
+                this.slideNext()
+                this.start()
+                event.preventDefault();
+            }
+
+        }
+        //通过选择器，获得被选中的元素
+        getSelectedItem(){
+            let index=0;
+            this.items.forEach(function (n,ind){
+                if(n.className=='slider_item--selected')
+               index=ind;
+            })
+            return this.items[index];
+        }
+        //获得被选中的元素在数组中的位置
+        getSelectedItemIndex(){
+            return this.items.indexOf(this.getSelectedItem());
+        }
+
+        stop(){
+            clearTimeout(this._timer)
+        }
+
+        start(){
+            this.stop();
+            this._timer=setInterval(()=>this.slideNext(),this.cycle)
+        }
+        sliderto(idx){
+            const currentitem=this.getSelectedItem()
+            if(currentitem){
+                currentitem.className='slider_item'
+            }
+            const item=this.items[idx]
+            if(item)
+                item.className='slider_item--selected';
+
+            // 自定义事件
+            const detail={index:idx};
+            const myCusEvent=new CustomEvent('slide',{detail,bubbles:true})
+            this.container.dispatchEvent(myCusEvent)
+        }
+        // 将下一张图片标记为选中状态
+        slideNext(){
+            const currentidx=this.getSelectedItemIndex();
+            const nextidx=(currentidx+1)%this.items.length;
+            this.sliderto(nextidx)
+        }
+        // 将上一张标记为选中状态
+        slidePrevious(){
+            const currentidx=this.getSelectedItemIndex()
+            const previousidx=(currentidx-1+this.items.length)%this.items.length;
+            this.sliderto(previousidx)
+        }
+    }
+    const container=document.getElementsByClassName('slider')[0];
+    const slider=new Slider(container)
+    slider.start()
+
+</script>
+</html>
