@@ -111,6 +111,7 @@
         }
 
         start(){
+
             this.stop();
             this._timer=setInterval(()=>this.slideNext(),this.cycle)
         }
@@ -122,7 +123,7 @@
             const item=this.items[idx]
             if(item)
                 item.className='slider_item--selected';
-
+            console.log(document.querySelectorAll('.slider_item--selected')[0].innerHTML)
             // 自定义事件
             const detail={index:idx};
             const myCusEvent=new CustomEvent('slide',{detail,bubbles:true})
@@ -130,6 +131,7 @@
         }
         // 将下一张图片标记为选中状态
         slideNext(){
+
             const currentidx=this.getSelectedItemIndex();
             const nextidx=(currentidx+1)%this.items.length;
             this.sliderto(nextidx)
