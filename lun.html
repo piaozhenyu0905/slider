@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="./lunbo.css">
+  <link rel="stylesheet" href="./reset.css">
+  <link rel="stylesheet" href="./fontaqesome_css/all.min.css">
+</head>
+
+<style>
+
+</style>
+<body>
+
+<!-- 轮播图 -->
+<div class='slider' id="app" >
+  <ul>
+    <li v-for="(item,index) in slide_class" :class="item">
+         <img :src='src(index+1)' alt=""/>
+    </li>
+  </ul>
+
+  <!-- 两个a控制上一张和下一张 -->
+  <a href="#" class="slider_next" @click="slider_next">
+    <i class='fas fa-angle-right'></i>
+  </a>
+  <a href="#" class="slider_previous" @click="slider_previous">
+    <i class='fas fa-angle-left'></i>
+  </a>
+
+  <!-- 四个span表示底部的四个小圆点 -->
+  <div class="slider_control" @mouseover="slide_over" @mouseout="slide_out">
+    <span v-for="item in button_class" :class="item"></span>
+  </div>
+
+</div>
+
+<script src="./vue.js"></script>
+<script>
+
+  const app=new Vue({
+    el: '#app',
+    data: {
+      cycle: 3000,
+      _timer: 0,
+      // buttons:document.querySelectorAll('.slider_control-buttons,.slider_control-buttons--selected'),
+      slide_class:['slider_item--selected','slider_item','slider_item','slider_item'],
+      button_class:['slider_control-buttons--selected','slider_control-buttons','slider_control-buttons','slider_control-buttons']
+    },
+    methods: {
+
+      start() {
+        this.stop();
+        this._timer = setInterval(() => this.slideNext(), this.cycle)
+      },
+      stop() {
+        clearTimeout(this._timer)
+      },
+
+      getSelectedItemIndex() {
+        return this.slide_class.indexOf('slider_item--selected')
+      },
+      getSeletedbuttonIndex(){
+        return this.button_class.indexOf('slider_control-buttons--selected')
+      },
+      sliderto(idx) {
+        const currentindex=this.getSelectedItemIndex()
+        this.$set(this.slide_class,currentindex,'slider_item');
+        this.$set(this.slide_class,idx,'slider_item--selected')
+      },
+      slideNext() {
+        const currentidx = this.getSelectedItemIndex();
+        const nextidx = (currentidx + 1) % this.slide_class.length;
+        this.sliderto(nextidx)
+      },
+      slidePrevious() {
+        const currentidx = this.getSelectedItemIndex()
+        const previousidx = (currentidx - 1 + this.slide_class.length) % this.slide_class.length;
+        this.sliderto(previousidx)
+      },
+      slider_next(event){
+        this.stop()
+        this.slideNext()
+        this.start()
+        event.preventDefault();
+      },
+      slider_previous(event){
+        this.stop()
+        this.slidePrevious()
+        this.start()
+        event.preventDefault();
+      },
+      slide_over(event){
+        const  buttons=document.querySelectorAll('.slider_control-buttons,.slider_control-buttons--selected')
+        const idx=Array.from(buttons).indexOf(event.target);
+        if(idx!=-1) {
+          this.sliderto(idx);
+          this.stop();
+        }
+      },
+      slide_out(){
+        this.start(); //重新开启自动播放
+      },
+      src(index){
+        return "./src/pic"+index+".png"
+      },
+      button_change(nidx){
+        let oidx=this.getSeletedbuttonIndex()
+        this.$set(this.button_class,oidx,'slider_control-buttons')
+        this.$set(this.button_class,nidx,'slider_control-buttons--selected')
+      }
+    },
+    watch: {
+      slide_class(newValue) {
+        let nidx=newValue.indexOf('slider_item--selected')
+        this.button_change(nidx)
+      }
+    }
+  })
+  app.start()
+</script>
+
+</body>
+</html>
